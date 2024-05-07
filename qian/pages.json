@@ -1,0 +1,47 @@
+{
+	"pages": [
+		{
+			"path": "pages/img/img",
+			"style": {
+				"navigationBarTitleText": "图像识别",
+				"navigationBarBackgroundColor": "#07c160",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/text/text",
+			"style": {
+				"navigationBarTitleText": "文本识别",
+				"navigationBarBackgroundColor": "#07c160",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/nlp/nlp",
+			"style": {
+				"navigationBarTitleText": "文本纠错",
+				"navigationBarBackgroundColor": "#07c160",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/cartoon/cartoon",
+			"style": {
+				"navigationBarTitleText": "人像动漫化",
+				"navigationBarBackgroundColor": "#07c160",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/webview",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "人工智能",
+		"navigationBarBackgroundColor": "#07c160"
+	}
+}
