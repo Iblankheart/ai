@@ -47,22 +47,32 @@
 					<view class="diygw-col-24 text-clz"> 文本识别 </view>
 				</view>
 			</view>
-			<div>
-				<el-upload
-				  class="upload-demo"
-				  drag
-				  action="https://jsonplaceholder.typicode.com/posts/"
-				  multiple>
-				  <i class="el-icon-upload"></i>
-				  <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-				  <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
-				</el-upload>
-			</div>
+			
+			<u-form :model="form" :rules="formRules" :errorType="['message', 'toast']" ref="formRef"
+				class="flex diygw-form diygw-col-24">
+				<u-form-item :borderBottom="false" :required="true" class="diygw-col-24" label="上传图片" labelPosition="top"
+					prop="upload">
+					<u-upload width="160" height="160" :before-upload="beforeUpload" action="http://localhost:8080/word"
+						ref="uploadRef" :auto-upload="false" @upload-success="handleUploadSuccess"></u-upload>
+				</u-form-item>
+				<view @click="submitForm" class="diygw-col-24 bg-none text4-clz">提交</view>
+			</u-form>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 			<view class="diygw-col-24 text1-clz"> 识别结果: </view>
-			<view class="flex diygw-autoview diygw-col-24 flex-direction-column autoview2-clz">
-				<view class="diygw-absolute autoview2_0">
-					<view class="diygw-col-24 text2-clz">{{ recognizedText }}</view>
-				</view>
+			<view>
+				
+					<view v-for="(item, index) in this.datas" :key="index" class="result-item">
+					            <text class="text">{{ item.words }}<br></text>
+					</view>
 			</view>
 			<view class="clearfix"></view>
 		</div>
@@ -73,18 +83,7 @@
 	export default {
 		data() {
 			return {
-				file: null,
-				formRules: {
-					upload: [{
-						trigger: ['change', 'blur'],
-						required: true,
-						message: '请上传图片哟'
-					}]
-				},
-				form: {
-					upload: ''
-				},
-				recognizedText: ''
+				datas:[],
 			};
 		},
 		onShow() {
@@ -95,9 +94,33 @@
 		},
 
 		methods: {
-		    submit() {
-		    				this.$refs.uUpload.upload();
-		    		},
+		    submitForm() {
+		    	return new Promise((resolve, reject) => {
+		    		const uploadRef = this.$refs.uploadRef;
+		    		uploadRef.upload({
+		    			success: res => {
+		    				console.log('上传成功，后端返回的数据:', res);
+		    				this.handleUploadSuccess(
+		    				res); // Call a method to handle the successful upload
+		    				resolve(res); // Upload successful, call resolve
+		    			},
+		    			fail: err => {
+		    				console.error('上传失败:', err);
+		    				this.handleUploadFail(err); // Call a method to handle upload failure
+		    				reject(err); // Upload failed, call reject
+		    			}
+		    		});
+		    	});
+		    },
+		    handleUploadSuccess(data) {
+		    	console.log('接收到的上传成功数据:', data);
+		    	const responseData = JSON.parse(data);
+		    	this.datas = responseData.words_result;
+		    
+		    	console.log('保存数据:', this.datas);
+		    
+		    	
+		    },
 		  }
 	};
 </script>
@@ -209,5 +232,19 @@
 
 	.container32674 {
 		padding-bottom: 80px;
+	}
+	
+	.result-item{
+		width: 100%;
+		display: flex;
+		justify-content: center; /* 水平居中 */
+		align-items: center; /* 垂直居中 */
+	}
+	.text{
+		font-size: 15px;
+	}
+	
+	.flex diygw-autoview diygw-col-24 flex-direction-column autoview2-clz{
+		height: 308px;
 	}
 </style>

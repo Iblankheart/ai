@@ -3,6 +3,8 @@ import Vue from 'vue'
 import App from './App'
 import ElementUI from 'element-plus';    
 import "element-plus/dist/index.css"
+import axios from 'axios';
+
 createApp(App).use(store).use(router).use(ElementUI).mount('#app')
 
 import {

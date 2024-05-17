@@ -52,10 +52,10 @@
 			class="flex diygw-form diygw-col-24">
 			<u-form-item :borderBottom="false" :required="true" class="diygw-col-24" label="上传图片" labelPosition="top"
 				prop="upload">
-				<u-upload width="160" height="160" :before-upload="beforeUpload" action="http://localhost:8080/img" ref="uploadRef">
-				</u-upload>
+				<u-upload width="160" height="160" :before-upload="beforeUpload" action="http://localhost:8080/img"
+					ref="uploadRef" :auto-upload="false" @upload-success="handleUploadSuccess"></u-upload>
 			</u-form-item>
-			<view @click="uploadFileToServer" class="diygw-col-24 bg-none text4-clz"> 提交 </view>
+			<view @click="submitForm" class="diygw-col-24 bg-none text4-clz">提交</view>
 		</u-form>
 
 
@@ -105,10 +105,13 @@
 				</button>
 			</view>
 		</view>
-		<view class="diygw-col-24 text1-clz"> 识别结果: </view>
-		<view class="flex diygw-autoview diygw-col-24 flex-direction-column autoview2-clz">
-			<view class="diygw-absolute autoview2_0">
-				<view class="diygw-col-24 text2-clz" v-if="showRecognitionResult">{{ recognitionResult }}</view>
+		<view class="diygw-col-24 text1-clz"> 识别结果: <br><br></view>
+		<view >
+			<view v-for="(item, index) in this.datas" :key="index" class="result-item">
+			            <text class="keyword">关键词：{{ item.keyword }}<br></text>
+			            <text class="root">分类：{{ item.root }}&nbsp;<br></text>
+			            <text class="score">置信度：{{ formatScore(item.score) }}<br></text>
+						<br>
 			</view>
 		</view>
 		<view class="clearfix"></view>
@@ -116,22 +119,15 @@
 </template>
 
 <script>
+	import axios from 'axios';
+
 	export default {
+
 		data() {
 			return {
-				form: {
-					upload: [] // 用于存放上传的图片
-				},
-				formRules: {
-					upload: [{
-						required: true,
-						message: '请上传图片',
-						trigger: 'change'
-					}]
-				},
-				uploadFile: [],
-				recognitionResult: '', // 用于存放识别结果
-				showRecognitionResult: false
+				recognitionResult: "",
+				datas:[],
+
 			};
 		},
 		onShow() {
@@ -142,46 +138,42 @@
 			this.$refs.formRef?.setRules(this.formRules);
 		},
 		methods: {
-			 beforeUpload(index, list) {
-			   console.log("执行");
-			   
-			   // 获取上传的图片文件
-			   const file = list[index].file;
-			   console.log(file);
-			  
-			   console.log(this.$refs.uploadRef.lists[0]);
-			   
-			   // 创建 FormData 对象
-			   let formData = new FormData();
-			   formData.append('file', this.$refs.uploadRef.lists[0].file); // 使用 file.raw 获取原始文件对象
-			   // 使用 get 方法获取 'file' 字段的值
-			   let fileValue = formData.get('file');
-			   console.log('file', fileValue);
-			   console.dir(fileValue);
-			   // 发送请求给后端进行图像识别
-			   return new Promise((resolve, reject) => {
-			     // 替换 'url' 为实际的后端接口地址
-			     uni.uploadFile({
-			       url: 'http://localhost:8080/img', // 修改为你的后端接口地址
-			       filePath: file.path, // 上传文件路径
-			       name: 'file', // 后端接收文件的字段名
-			       formData: formData, // 表单数据
-			       success: (res) => {
-			         console.log("成功");
-			         // 解析后端返回的数据
-			         let data = JSON.parse(res.data);
-					 console.log(data);
-			         // 将识别结果作为 resolve 的参数
-			         resolve(data.result);
-			       },
-			       fail: (err) => {
-			         console.log("出错");
-			         // 中断上传，并将错误信息作为 reject 的参数
-			         reject(err);
-			       }
-			     });
-			   });
-			 }
+			submitForm() {
+				return new Promise((resolve, reject) => {
+					const uploadRef = this.$refs.uploadRef;
+					uploadRef.upload({
+						success: res => {
+							console.log('上传成功，后端返回的数据:', res);
+							this.handleUploadSuccess(
+							res); // Call a method to handle the successful upload
+							resolve(res); // Upload successful, call resolve
+						},
+						fail: err => {
+							console.error('上传失败:', err);
+							this.handleUploadFail(err); // Call a method to handle upload failure
+							reject(err); // Upload failed, call reject
+						}
+					});
+				});
+			},
+			handleUploadSuccess(data) {
+				console.log('接收到的上传成功数据:', data);
+				const responseData = JSON.parse(data);
+				this.datas = responseData.result.slice(0, 3);
+			
+				console.log('保存数据:', this.datas);
+			
+				
+			},
+			
+			formatScore(score) {
+			      return (score * 100).toFixed(2) + '%';
+			    }
+			
+			
+
+			
+
 
 		}
 	};
@@ -292,4 +284,10 @@
 	.container32674 {
 		padding-bottom: 80px;
 	}
+	
+	.result-item{
+		margin-left: 50px;
+		font-size: 13px;
+	}
+	
 </style>

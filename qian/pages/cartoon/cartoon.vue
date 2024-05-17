@@ -46,14 +46,24 @@
 				<view class="diygw-col-24 text-clz"> 人像动漫化 </view>
 			</view>
 		</view>
-		<u-form :model="form" :rules="formRules" :errorType="['message', 'toast']" ref="formRef" class="flex diygw-form diygw-col-24">
-			<u-form-item :borderBottom="false" :required="true" class="diygw-col-24" label="上传图片" labelPosition="top" prop="upload">
-				<u-upload width="160" height="160" maxCount="6" @on-success="uploadFormUpload" @on-remove="delFormUpload" action="" v-model="form.upload"> </u-upload>
+		
+		
+		
+		
+		<u-form :model="form" :rules="formRules" :errorType="['message', 'toast']" ref="formRef"
+			class="flex diygw-form diygw-col-24">
+			<u-form-item :borderBottom="false" :required="true" class="diygw-col-24" label="上传图片" labelPosition="top"
+				prop="upload">
+				<u-upload width="160" height="160" :before-upload="beforeUpload" action="http://localhost:8080/portrait"
+					ref="uploadRef" :auto-upload="false" @upload-success="handleUploadSuccess"></u-upload>
 			</u-form-item>
-			<view @click="submitForm" class="diygw-col-24 bg-none text4-clz"> 提交 </view>
+			<view @click="submitForm" class="diygw-col-24 bg-none text4-clz">提交</view>
 		</u-form>
+		
+		
+		
 		<view class="diygw-col-24 text1-clz"> 结果： </view>
-		<image src="/static/pic1.jpg" class="response diygw-col-24" mode="widthFix"></image>
+		<img class="imgm" :src="this.base64Image" v-if="base64Image"/>
 		<view class="clearfix"></view>
 	</view>
 </template>
@@ -62,24 +72,9 @@
 	export default {
 		data() {
 			return {
-				//用户全局信息
-				userInfo: {},
-				//页面传参
-				globalOption: {},
-				//自定义全局变量
-				globalData: {},
-				formRules: {
-					upload: [
-						{
-							trigger: ['change', 'blur'],
-							required: true,
-							message: '请上传图片哟'
-						}
-					]
-				},
-				form: {
-					upload: ''
-				}
+				datas:[],
+				base64Image:"",
+		
 			};
 		},
 		onShow() {
@@ -93,61 +88,53 @@
 				});
 			}
 
-			this.init();
 		},
 		onReady() {
 			this.$refs.formRef?.setRules(this.formRules);
 		},
+		
+		
 		methods: {
-			async init() {
-				await this.initResetform();
-			},
-			changeFormUpload(lists) {},
-			delFormUpload(index, lists) {
-				this.changeFormUpload(lists);
-			},
-			uploadFormUpload(res, index, lists) {
-				this.changeFormUpload(lists);
-			},
-			initResetform() {
-				this.initform = JSON.stringify(this.form);
-			},
-			resetForm() {
-				this.form = JSON.parse(this.initform);
-			},
-
-			async submitForm(e) {
-				this.$refs.formRef?.setRules(this.formRules);
-
-				this.$nextTick(async () => {
-					let valid = await this.$refs.formRef.validate();
-					if (valid) {
-						//保存数据
-						let param = this.form;
-						let header = {};
-						let url = '';
-						if (!url) {
-							this.showToast('请先配置表单提交地址', 'none');
-							return false;
+			submitForm() {
+				return new Promise((resolve, reject) => {
+					const uploadRef = this.$refs.uploadRef;
+					uploadRef.upload({
+						success: res => {
+							console.log('上传成功，后端返回的数据:', res);
+							this.handleUploadSuccess(
+							res); // Call a method to handle the successful upload
+							resolve(res); // Upload successful, call resolve
+						},
+						fail: err => {
+							console.error('上传失败:', err);
+							this.handleUploadFail(err); // Call a method to handle upload failure
+							reject(err); // Upload failed, call reject
 						}
-
-						let res = await this.$http.post(url, param, header, 'json');
-
-						if (res.code == 200) {
-							this.showToast(res.msg, 'success');
-						} else {
-							this.showModal(res.msg, '提示', false);
-						}
-					} else {
-						console.log('验证失败');
-					}
+					});
 				});
-			}
+			},
+			handleUploadSuccess(data) {
+				console.log('接收到的上传成功数据:', data);
+				const responseData = JSON.parse(data);
+				this.datas = responseData.image;
+				this.base64Image = `data:image/jpeg;base64,${this.datas}`;
+			
+				console.log('保存数据:', this.datas);
+			
+				
+			},
+			
+			
 		}
+		
 	};
 </script>
 
 <style lang="scss" scoped>
+	.imgm{
+		width: 100%;
+		height: 500px;
+	}
 	.bar1-clz {
 		font-size: 26rpx !important;
 	}
