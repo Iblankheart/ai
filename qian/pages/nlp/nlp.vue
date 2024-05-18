@@ -37,8 +37,8 @@
 			</view>
 		</view>
 		<view class="flex diygw-autoview diygw-col-24 flex-direction-column autoview1-clz">
-			<view class="diygw-absolute autoview1_0">
-				<image src="/static/designer.png" class="response diygw-col-24" mode="widthFix"></image>
+			<view >
+				<image src="/static/designer.png" class="top" ></image>
 			</view>
 		</view>
 		<view class="flex diygw-autoview diygw-col-24 flex-direction-column autoview-clz">
@@ -145,6 +145,11 @@
 </script>
 
 <style lang="scss" scoped>
+	.top{
+		width: 320px;
+		height: 187.19px;
+		margin-left: 36px;
+	}
 	.bar1-clz {
 		font-size: 26rpx !important;
 	}
